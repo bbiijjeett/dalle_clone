@@ -24,7 +24,7 @@ const CreatePost = () => {
     if (form.prompt) {
       try {
         setGeneratingImg(true);
-        const response = await fetch('https://dalle-arbb.onrender.com/api/v1/dalle', {
+        const response = await fetch('http://localhost:8080/api/v1/dalle', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -33,20 +33,19 @@ const CreatePost = () => {
             prompt: form.prompt,
           }),
         });
-        console.log("###Done");
-        const responseText = await response.text();
-        console.log("###Done0"+responseText);
-        const trimmedResponseText = responseText.trim();
-        console.log("###Done01"+trimmedResponseText);
-        const data = JSON.parse(trimmedResponseText);
+        
+        // const responseText = await response.text();
+        
+        // const trimmedResponseText = responseText.trim();
+        
+        // const data = JSON.parse(trimmedResponseText);
 
-        //const data = await response.json();
-        console.log("###Done1"+data);
+        const data = await response.json();
+        
         setForm({ ...form, photo: `data:image/jpeg;base64,${data.photo}` });
-        console.log("###Done2");
+        
       } catch (err) {
         alert(err);
-        console.log("###"+err);
       } finally {
         setGeneratingImg(false);
       }
@@ -55,8 +54,31 @@ const CreatePost = () => {
     }
   };
 
-  const handleSubmit = () => {
-    
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if(form.prompt && form.photo){
+      setLoading(true);
+      try {
+        const response = await fetch('http://localhost:8080/api/v1/post', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ...form }),
+        });
+
+        await response.json();
+        alert('Success');
+        navigate('/');
+        
+      } catch (error) {
+        alert(error);
+      }finally{
+        setLoading(false);
+      }
+    }else {
+      alert('Please generate an image with proper details');
+    }
   };
   
   const handleSurpriseMe = () => {
